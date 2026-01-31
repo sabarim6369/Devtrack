@@ -20,25 +20,53 @@ const Settings = () => {
             <div className="p-2 bg-white/5 rounded-lg">
               <Github className="w-5 h-5 text-white" />
             </div>
-            <h2 className="text-xl font-semibold text-white">GitHub Connection</h2>
+            <h2 className="text-xl font-semibold text-white">Linked Accounts</h2>
           </div>
 
-          <div className="flex items-center justify-between p-5 bg-white/5 rounded-xl border border-white/5 mb-4 max-w-2xl">
-            <div className="flex items-center space-x-4">
-              <div className="w-10 h-10 bg-green-500/20 rounded-full flex items-center justify-center">
-                <CheckCircle2 className="w-5 h-5 text-green-400" />
+          <div className="space-y-4 mb-6">
+            {/* Active Account */}
+            <div className="flex items-center justify-between p-4 bg-gradient-to-r from-blue-600/10 to-purple-600/10 rounded-xl border border-blue-500/30">
+              <div className="flex items-center space-x-4">
+                <img
+                  src="https://github.com/github.png"
+                  alt="Profile"
+                  className="w-10 h-10 rounded-lg border border-white/10"
+                />
+                <div className="flex flex-col">
+                  <div className="flex items-center space-x-2">
+                    <span className="text-white font-medium">sabarim6369</span>
+                    <span className="text-[10px] bg-blue-500 text-white px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">Active</span>
+                  </div>
+                  <span className="text-xs text-gray-400">Synced 5m ago</span>
+                </div>
               </div>
-              <div className="flex flex-col">
-                <span className="text-white font-medium">Connected to GitHub</span>
-                <span className="text-xs text-gray-400">Last synced: 5 minutes ago</span>
-              </div>
+              <Button variant="secondary" className="h-9 px-3 text-sm border-red-500/30 hover:bg-red-500/10 hover:text-red-400 text-gray-400">
+                Unlink
+              </Button>
             </div>
-            <Button variant="ghost" className="text-red-400 hover:text-red-300 hover:bg-red-500/10 h-10 px-4 text-sm">
-              Disconnect
-            </Button>
+
+            {/* Inactive Account Example */}
+            <div className="flex items-center justify-between p-4 bg-white/5 rounded-xl border border-white/5 hover:border-white/10 transition-colors group">
+              <div className="flex items-center space-x-4">
+                <div className="w-10 h-10 rounded-lg bg-gray-800 flex items-center justify-center border border-white/5 text-gray-500 font-bold">
+                  JD
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-gray-300 font-medium group-hover:text-white transition-colors">johndoe_dev</span>
+                  <span className="text-xs text-gray-500">Last active 2d ago</span>
+                </div>
+              </div>
+              <Button variant="ghost" className="h-9 px-3 text-sm text-blue-400 hover:text-blue-300">
+                Switch
+              </Button>
+            </div>
           </div>
 
-          <div className="bg-blue-500/10 border border-blue-500/20 rounded-xl p-4 flex items-start space-x-3 max-w-2xl">
+          <Button variant="secondary" className="w-full justify-center border-dashed border-white/20 hover:border-blue-500/50 hover:bg-blue-500/5 text-gray-400 hover:text-blue-400" icon={Github}>
+            Connect Another Account
+          </Button>
+
+          <div className="mt-6 bg-blue-500/10 border border-blue-500/20 rounded-xl p-4 flex items-start space-x-3 max-w-2xl">
             <Shield className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
             <p className="text-sm text-blue-200">
               <strong>Read-only access:</strong> DevTrack AI only requests read permissions.

@@ -31,7 +31,7 @@ const Signup = () => {
                         icon={Lock}
                     />
 
-                    <Link to="/dashboard" className="block">
+                    <Link to="/connect-account" className="block">
                         <Button className="w-full justify-center" variant="primary">
                             Create Account
                             <ArrowRight className="w-5 h-5 ml-2" />
