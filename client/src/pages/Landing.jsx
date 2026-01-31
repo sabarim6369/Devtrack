@@ -53,7 +53,7 @@ const Landing = () => {
               </span>
             </div>
             <Link
-              to="/dashboard"
+              to="/login"
               className="px-6 py-2.5 text-sm font-medium text-white/90 hover:text-white hover:bg-white/5 rounded-lg transition-all duration-200 border border-white/10"
             >
               Sign In
@@ -92,15 +92,15 @@ const Landing = () => {
 
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
-            <Link to="/dashboard">
+            <Link to="/signup">
               <Button variant="primary" icon={Github} className="text-lg px-8 py-4">
                 Connect GitHub
               </Button>
             </Link>
 
-            <Link to="/dashboard">
+            <Link to="/login">
               <Button variant="secondary" className="text-lg px-8 py-4">
-                View Demo Dashboard
+                Sign In
               </Button>
             </Link>
           </div>
