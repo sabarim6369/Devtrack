@@ -51,12 +51,13 @@ exports.githubCallback = async (req, res) => {
                     // Update existing user with GitHub info
                     user.githubId = githubUser.id;
                     user.accessToken = accessToken;
-                    user.username = user.username || githubUser.login; // Keep existing username if present
-                    user.avatarUrl = user.avatarUrl || githubUser.avatar_url;
+                    user.username = githubUser.login; // Update to latest GitHub username
+                    user.avatarUrl = githubUser.avatar_url;
+                    user.lastSynced = new Date();
                     await user.save();
 
                     // Redirect to Connect Account page or Dashboard
-                    return res.redirect(`${process.env.CLIENT_URL}/dashboard`);
+                    return res.redirect(`${process.env.CLIENT_URL}/dashboard?github_connected=true`);
                 }
             } catch (err) {
                 // Token invalid, proceed to normal login/signup
@@ -88,9 +89,11 @@ exports.githubCallback = async (req, res) => {
                 await user.save();
             }
         } else {
+            // Existing GitHub user logging in again - update token and info
             user.accessToken = accessToken;
             user.username = githubUser.login;
             user.avatarUrl = githubUser.avatar_url;
+            user.lastSynced = new Date();
             await user.save();
         }
 

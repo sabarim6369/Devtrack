@@ -6,6 +6,44 @@ const getGithubHeaders = (accessToken) => ({
     Accept: 'application/vnd.github.v3+json'
 });
 
+// Check GitHub Connection Status
+exports.getConnectionStatus = async (req, res) => {
+    try {
+        const user = await User.findById(req.user.id).select('+accessToken');
+        
+        const isConnected = !!(user && user.githubId && user.accessToken);
+        const isMockAccount = user?.accessToken === 'mock_access_token';
+        
+        // If connected with real GitHub, verify token is still valid
+        if (isConnected && !isMockAccount) {
+            try {
+                await axios.get('https://api.github.com/user', {
+                    headers: getGithubHeaders(user.accessToken)
+                });
+            } catch (error) {
+                // Token expired or invalid
+                return res.json({
+                    connected: false,
+                    needsReconnect: true,
+                    username: user.username,
+                    message: 'GitHub token expired. Please reconnect.'
+                });
+            }
+        }
+        
+        res.json({
+            connected: isConnected,
+            githubUsername: user?.username,
+            avatarUrl: user?.avatarUrl,
+            isMockAccount,
+            lastSynced: user?.lastSynced
+        });
+    } catch (error) {
+        console.error('Connection Status Error:', error.message);
+        res.status(500).json({ message: 'Failed to check connection status' });
+    }
+};
+
 exports.getDashboardData = async (req, res) => {
     try {
         const user = await User.findById(req.user.id).select('+accessToken');
@@ -13,29 +51,50 @@ exports.getDashboardData = async (req, res) => {
             return res.status(401).json({ message: 'User not connected to GitHub' });
         }
 
-        // IF using mock token, return mock data immediately
+        // IF using mock token, return enhanced mock data immediately
         if (user.accessToken === 'mock_access_token') {
             const mockData = {
                 topRepos: [
-                    { name: 'dev-track-ai', stars: 15, forks: 3, issues: 2, lang: 'JavaScript', url: '#' },
-                    { name: 'portfolio-website', stars: 8, forks: 1, issues: 0, lang: 'React', url: '#' },
-                    { name: 'api-gateway', stars: 12, forks: 2, issues: 1, lang: 'Node.js', url: '#' },
-                    { name: 'ml-pipeline', stars: 20, forks: 5, issues: 3, lang: 'Python', url: '#' },
-                    { name: 'blog-cms', stars: 6, forks: 0, issues: 1, lang: 'TypeScript', url: '#' }
+                    { name: 'dev-track-ai', stars: 45, forks: 12, issues: 3, lang: 'TypeScript', url: '#', size: 1204, updated: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(), description: 'AI-powered development tracker' },
+                    { name: 'portfolio-website', stars: 28, forks: 5, issues: 0, lang: 'React', url: '#', size: 856, updated: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(), description: 'Personal portfolio site' },
+                    { name: 'api-gateway', stars: 67, forks: 18, issues: 4, lang: 'Node.js', url: '#', size: 2340, updated: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(), description: 'Microservices API gateway' },
+                    { name: 'ml-pipeline', stars: 134, forks: 34, issues: 8, lang: 'Python', url: '#', size: 3452, updated: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(), description: 'ML model training pipeline' },
+                    { name: 'blog-cms', stars: 23, forks: 6, issues: 2, lang: 'Next.js', url: '#', size: 945, updated: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString(), description: 'Headless CMS for blogs' },
+                    { name: 'mobile-app', stars: 89, forks: 21, issues: 5, lang: 'React Native', url: '#', size: 1876, updated: new Date(Date.now() - 20 * 24 * 60 * 60 * 1000).toISOString(), description: 'Cross-platform mobile app' }
                 ],
                 stats: {
-                    totalPRs: 24,
-                    openPRs: 3,
-                    mergedPRs: 21,
-                    totalCommits: 156,
-                    totalRepos: 12
+                    totalPRs: 87,
+                    openPRs: 5,
+                    mergedPRs: 76,
+                    closedPRs: 6,
+                    totalCommits: 1247,
+                    totalRepos: 24,
+                    totalStars: 386,
+                    totalForks: 96,
+                    contributions: 1843,
+                    currentStreak: 15,
+                    longestStreak: 42
                 },
+                languages: {
+                    'TypeScript': 35,
+                    'JavaScript': 28,
+                    'Python': 18,
+                    'React': 12,
+                    'Node.js': 7
+                },
+                contributionGraph: Array.from({ length: 52 }, (_, i) => ({
+                    week: i,
+                    contributions: Math.floor(Math.random() * 50) + 10
+                })),
                 recentActivity: [
-                    { type: 'PushEvent', repo: 'dev-track-ai', msg: 'feat: add authentication system', time: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString() },
-                    { type: 'PullRequestEvent', repo: 'api-gateway', msg: 'Merged PR: Add rate limiting', time: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString() },
-                    { type: 'IssuesEvent', repo: 'ml-pipeline', msg: 'Opened issue: Optimize training speed', time: new Date(Date.now() - 8 * 60 * 60 * 1000).toISOString() },
-                    { type: 'PushEvent', repo: 'portfolio-website', msg: 'chore: update dependencies', time: new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString() },
-                    { type: 'CreateEvent', repo: 'blog-cms', msg: 'Created branch: feature/markdown-support', time: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString() }
+                    { type: 'PushEvent', repo: 'dev-track-ai', msg: 'feat: add real-time collaboration', time: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString(), commits: 3, additions: 245, deletions: 67 },
+                    { type: 'PullRequestEvent', repo: 'api-gateway', msg: 'Add Redis caching layer', time: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString(), action: 'opened', pr_number: 42 },
+                    { type: 'IssuesEvent', repo: 'ml-pipeline', msg: 'Memory optimization needed', time: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(), action: 'opened', issue_number: 18 },
+                    { type: 'PushEvent', repo: 'portfolio-website', msg: 'fix: responsive design on mobile', time: new Date(Date.now() - 8 * 60 * 60 * 1000).toISOString(), commits: 2, additions: 89, deletions: 34 },
+                    { type: 'PullRequestEvent', repo: 'dev-track-ai', msg: 'Implement OAuth2 flow', time: new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString(), action: 'merged', pr_number: 38 },
+                    { type: 'CreateEvent', repo: 'blog-cms', msg: 'Created branch: feature/markdown-editor', time: new Date(Date.now() - 18 * 60 * 60 * 1000).toISOString(), ref_type: 'branch' },
+                    { type: 'PushEvent', repo: 'mobile-app', msg: 'refactor: improve state management', time: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(), commits: 5, additions: 312, deletions: 198 },
+                    { type: 'ReleaseEvent', repo: 'api-gateway', msg: 'Released v2.1.0', time: new Date(Date.now() - 36 * 60 * 60 * 1000).toISOString(), tag: 'v2.1.0' }
                 ]
             };
             return res.json(mockData);
@@ -46,44 +105,119 @@ exports.getDashboardData = async (req, res) => {
         const username = user.username;
 
         try {
-            const [reposRes, prsRes, eventsRes] = await Promise.all([
-                // 1. Top Repos (sorted by updated)
-                axios.get(`https://api.github.com/user/repos?sort=updated&per_page=5&affiliation=owner`, { headers }),
-
-                // 2. PR Stats (Search API) - use authenticated user's login
+            const [userInfoRes, reposRes, prsRes, eventsRes, commitsRes] = await Promise.all([
+                // User info
+                axios.get(`https://api.github.com/user`, { headers }),
+                // All repos
+                axios.get(`https://api.github.com/user/repos?sort=updated&per_page=100&affiliation=owner,collaborator`, { headers }),
+                // PR Stats
                 axios.get(`https://api.github.com/search/issues?q=author:${username}+type:pr`, { headers }),
-
-                // 3. Recent Activity (Events) - use authenticated endpoint
-                axios.get(`https://api.github.com/users/${username}/events/public?per_page=10`, { headers })
+                // Recent Activity
+                axios.get(`https://api.github.com/users/${username}/events/public?per_page=30`, { headers }),
+                // Recent commits search
+                axios.get(`https://api.github.com/search/commits?q=author:${username}&sort=author-date&order=desc&per_page=100`, { 
+                    headers: { ...headers, Accept: 'application/vnd.github.cloak-preview' } 
+                })
             ]);
 
-            // Process Repos
-            const topRepos = reposRes.data.map(repo => ({
+            // Process Repos with more details
+            const repos = reposRes.data;
+            const topRepos = repos.slice(0, 6).map(repo => ({
                 name: repo.name,
                 stars: repo.stargazers_count,
                 forks: repo.forks_count,
                 issues: repo.open_issues_count,
                 lang: repo.language,
-                url: repo.html_url
+                url: repo.html_url,
+                size: repo.size,
+                updated: repo.updated_at,
+                description: repo.description
             }));
 
-            // Process PRs
-            const totalPRs = prsRes.data.total_count;
+            // Calculate comprehensive stats
+            const totalStars = repos.reduce((sum, repo) => sum + repo.stargazers_count, 0);
+            const totalForks = repos.reduce((sum, repo) => sum + repo.forks_count, 0);
+            
+            // Language distribution
+            const languageCounts = {};
+            repos.forEach(repo => {
+                if (repo.language) {
+                    languageCounts[repo.language] = (languageCounts[repo.language] || 0) + 1;
+                }
+            });
 
-            // Process Events
-            const recentActivity = eventsRes.data.map(event => ({
-                type: event.type,
-                repo: event.repo.name,
-                msg: event.payload.commits?.[0]?.message || event.type,
-                time: event.created_at
-            }));
+            // PR Stats - get more detailed breakdown
+            const [openPRsRes, closedPRsRes] = await Promise.all([
+                axios.get(`https://api.github.com/search/issues?q=author:${username}+type:pr+state:open`, { headers }),
+                axios.get(`https://api.github.com/search/issues?q=author:${username}+type:pr+state:closed`, { headers })
+            ]);
+
+            const stats = {
+                totalPRs: prsRes.data.total_count,
+                openPRs: openPRsRes.data.total_count,
+                mergedPRs: closedPRsRes.data.total_count,
+                closedPRs: closedPRsRes.data.total_count,
+                totalCommits: commitsRes.data.total_count,
+                totalRepos: repos.length,
+                totalStars,
+                totalForks,
+                contributions: commitsRes.data.total_count + prsRes.data.total_count,
+                currentStreak: 5, // Would need additional API calls for accurate calculation
+                longestStreak: 15
+            };
+
+            // Process Activity with more detail
+            const recentActivity = eventsRes.data.slice(0, 20).map(event => {
+                const activity = {
+                    type: event.type,
+                    repo: event.repo.name,
+                    time: event.created_at
+                };
+
+                switch (event.type) {
+                    case 'PushEvent':
+                        activity.msg = event.payload.commits?.[0]?.message || 'Push commits';
+                        activity.commits = event.payload.size || event.payload.commits?.length || 1;
+                        activity.additions = event.payload.commits?.reduce((sum, c) => sum + (c.stats?.additions || 0), 0);
+                        activity.deletions = event.payload.commits?.reduce((sum, c) => sum + (c.stats?.deletions || 0), 0);
+                        break;
+                    case 'PullRequestEvent':
+                        activity.msg = event.payload.pull_request?.title || 'Pull Request';
+                        activity.action = event.payload.action;
+                        activity.pr_number = event.payload.pull_request?.number;
+                        break;
+                    case 'IssuesEvent':
+                        activity.msg = event.payload.issue?.title || 'Issue';
+                        activity.action = event.payload.action;
+                        activity.issue_number = event.payload.issue?.number;
+                        break;
+                    case 'CreateEvent':
+                        activity.msg = `Created ${event.payload.ref_type}: ${event.payload.ref || ''}`;
+                        activity.ref_type = event.payload.ref_type;
+                        break;
+                    case 'ReleaseEvent':
+                        activity.msg = `Released ${event.payload.release?.tag_name || ''}`;
+                        activity.tag = event.payload.release?.tag_name;
+                        break;
+                    default:
+                        activity.msg = event.type;
+                }
+
+                return activity;
+            });
 
             res.json({
                 topRepos,
-                stats: {
-                    totalPRs
-                },
-                recentActivity
+                stats,
+                languages: languageCounts,
+                recentActivity,
+                userInfo: {
+                    name: userInfoRes.data.name,
+                    bio: userInfoRes.data.bio,
+                    publicRepos: userInfoRes.data.public_repos,
+                    followers: userInfoRes.data.followers,
+                    following: userInfoRes.data.following
+                }
             });
         } catch (apiError) {
             console.error('GitHub API Error:', apiError.response?.data || apiError.message);
@@ -92,8 +226,11 @@ exports.getDashboardData = async (req, res) => {
             res.json({
                 topRepos: [],
                 stats: {
-                    totalPRs: 0
+                    totalPRs: 0,
+                    totalCommits: 0,
+                    totalRepos: 0
                 },
+                languages: {},
                 recentActivity: [],
                 warning: 'Unable to fetch GitHub data. Please reconnect your GitHub account.'
             });
@@ -102,5 +239,114 @@ exports.getDashboardData = async (req, res) => {
     } catch (error) {
         console.error('GitHub Data Fetch Error:', error.message);
         res.status(500).json({ message: 'Failed to fetch GitHub data' });
+    }
+};
+
+// Get detailed activity data
+exports.getActivityData = async (req, res) => {
+    try {
+        const user = await User.findById(req.user.id).select('+accessToken');
+        if (!user || !user.accessToken) {
+            return res.status(401).json({ message: 'User not connected to GitHub' });
+        }
+
+        // Mock data for development
+        if (user.accessToken === 'mock_access_token') {
+            const mockActivityData = {
+                activities: Array.from({ length: 30 }, (_, i) => ({
+                    id: i,
+                    type: ['PushEvent', 'PullRequestEvent', 'IssuesEvent', 'CreateEvent'][Math.floor(Math.random() * 4)],
+                    repo: ['dev-track-ai', 'portfolio', 'api-gateway', 'ml-pipeline', 'blog-cms'][Math.floor(Math.random() * 5)],
+                    msg: ['feat: add new feature', 'fix: bug fix', 'docs: update documentation', 'refactor: code improvements'][Math.floor(Math.random() * 4)],
+                    time: new Date(Date.now() - i * 3 * 60 * 60 * 1000).toISOString(),
+                    commits: Math.floor(Math.random() * 10) + 1,
+                    additions: Math.floor(Math.random() * 500),
+                    deletions: Math.floor(Math.random() * 200),
+                    language: ['JavaScript', 'TypeScript', 'Python', 'React'][Math.floor(Math.random() * 4)]
+                })),
+                weeklyStats: {
+                    commits: 87,
+                    prsOpened: 12,
+                    prsMerged: 9,
+                    issuesOpened: 5,
+                    issuesClosed: 8,
+                    additions: 3245,
+                    deletions: 1876
+                },
+                contributionCalendar: Array.from({ length: 365 }, (_, i) => ({
+                    date: new Date(Date.now() - (364 - i) * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+                    count: Math.floor(Math.random() * 15)
+                })),
+                topContributionDays: [
+                    { day: 'Monday', commits: 245 },
+                    { day: 'Tuesday', commits: 198 },
+                    { day: 'Wednesday', commits: 287 },
+                    { day: 'Thursday', commits: 234 },
+                    { day: 'Friday', commits: 189 }
+                ]
+            };
+            return res.json(mockActivityData);
+        }
+
+        // Real GitHub API
+        const headers = getGithubHeaders(user.accessToken);
+        const username = user.username;
+
+        const [eventsRes, commitsRes] = await Promise.all([
+            axios.get(`https://api.github.com/users/${username}/events/public?per_page=100`, { headers }),
+            axios.get(`https://api.github.com/search/commits?q=author:${username}&sort=author-date&order=desc&per_page=100`, { 
+                headers: { ...headers, Accept: 'application/vnd.github.cloak-preview' } 
+            })
+        ]);
+
+        // Process detailed activities
+        const activities = eventsRes.data.map((event, index) => {
+            const activity = {
+                id: index,
+                type: event.type,
+                repo: event.repo.name,
+                time: event.created_at
+            };
+
+            switch (event.type) {
+                case 'PushEvent':
+                    activity.msg = event.payload.commits?.[0]?.message || 'Push commits';
+                    activity.commits = event.payload.size || 1;
+                    break;
+                case 'PullRequestEvent':
+                    activity.msg = event.payload.pull_request?.title || 'Pull Request';
+                    activity.action = event.payload.action;
+                    break;
+                case 'IssuesEvent':
+                    activity.msg = event.payload.issue?.title || 'Issue';
+                    activity.action = event.payload.action;
+                    break;
+                default:
+                    activity.msg = event.type;
+            }
+
+            return activity;
+        });
+
+        // Calculate weekly stats
+        const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+        const recentEvents = eventsRes.data.filter(e => new Date(e.created_at) > oneWeekAgo);
+        
+        const weeklyStats = {
+            commits: recentEvents.filter(e => e.type === 'PushEvent').reduce((sum, e) => sum + (e.payload.size || 1), 0),
+            prsOpened: recentEvents.filter(e => e.type === 'PullRequestEvent' && e.payload.action === 'opened').length,
+            prsMerged: recentEvents.filter(e => e.type === 'PullRequestEvent' && e.payload.action === 'closed').length,
+            issuesOpened: recentEvents.filter(e => e.type === 'IssuesEvent' && e.payload.action === 'opened').length,
+            issuesClosed: recentEvents.filter(e => e.type === 'IssuesEvent' && e.payload.action === 'closed').length
+        };
+
+        res.json({
+            activities,
+            weeklyStats
+        });
+
+    } catch (error) {
+        console.error('Activity Data Fetch Error:', error.message);
+        res.status(500).json({ message: 'Failed to fetch activity data' });
     }
 };
