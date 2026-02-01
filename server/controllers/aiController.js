@@ -2,14 +2,14 @@ const OpenAI = require('openai');
 const User = require('../models/User');
 const axios = require('axios');
 
-// Initialize OpenAI client for Grok API
+// Initialize OpenAI client for Groq API
 const openai = new OpenAI({
-  apiKey: process.env.XAI_API_KEY || 'mock_key',
-  baseURL: 'https://api.x.ai/v1'
+  apiKey: process.env.GROQ_API_KEY || 'mock_key',
+  baseURL: 'https://api.groq.com/openai/v1'
 });
 
 // Check if we're using mock mode
-const isMockMode = !process.env.XAI_API_KEY || process.env.XAI_API_KEY === 'your_grok_api_key_here' || process.env.XAI_API_KEY === 'mock_key';
+const isMockMode = !process.env.GROQ_API_KEY || process.env.GROQ_API_KEY === 'your_groq_api_key_here' || process.env.GROQ_API_KEY === 'mock_key';
 
 /**
  * Fetch comprehensive GitHub data for AI analysis
@@ -167,7 +167,7 @@ Provide a detailed analysis in JSON format with the following structure:
 Be specific, actionable, and encouraging. Focus on practical improvements.`;
 
     const completion = await openai.chat.completions.create({
-      model: 'grok-beta',
+      model: 'llama-3.3-70b-versatile',
       messages: [
         { role: 'system', content: 'You are a developer productivity expert AI assistant.' },
         { role: 'user', content: prompt }
@@ -473,7 +473,7 @@ exports.chatWithAI = async (req, res) => {
 
     // Real AI response
     const completion = await openai.chat.completions.create({
-      model: 'grok-beta',
+      model: 'llama-3.3-70b-versatile',
       messages: [
         {
           role: 'system',

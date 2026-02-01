@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Activity, Sparkles, Settings, User, LogOut } from 'lucide-react';
+import { LayoutDashboard, Activity, Sparkles, Settings, User, LogOut, FolderGit2 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 const Layout = ({ children }) => {
@@ -9,6 +9,7 @@ const Layout = ({ children }) => {
   const navItems = [
     { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard' },
     { icon: Activity, label: 'Activity', path: '/activity' },
+    { icon: FolderGit2, label: 'Repositories', path: '/repositories' },
     { icon: Sparkles, label: 'AI Insights', path: '/ai-insights' },
     { icon: Settings, label: 'Settings', path: '/settings' },
   ];

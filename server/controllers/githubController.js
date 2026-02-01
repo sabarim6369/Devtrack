@@ -350,3 +350,194 @@ exports.getActivityData = async (req, res) => {
         res.status(500).json({ message: 'Failed to fetch activity data' });
     }
 };
+
+// Get All Repositories
+exports.getRepositories = async (req, res) => {
+    try {
+        const user = await User.findById(req.user.id).select('+accessToken');
+        if (!user || !user.accessToken) {
+            return res.status(401).json({ message: 'User not connected to GitHub' });
+        }
+
+        // If using mock token, return mock repositories
+        if (user.accessToken === 'mock_access_token') {
+            const mockRepos = [
+                {
+                    id: 1,
+                    name: 'dev-track-ai',
+                    full_name: 'yourusername/dev-track-ai',
+                    description: 'AI-powered development tracker with real-time insights',
+                    html_url: 'https://github.com/yourusername/dev-track-ai',
+                    language: 'TypeScript',
+                    stargazers_count: 45,
+                    forks_count: 12,
+                    open_issues_count: 3,
+                    private: false,
+                    fork: false,
+                    archived: false,
+                    size: 1204,
+                    created_at: new Date(Date.now() - 180 * 24 * 60 * 60 * 1000).toISOString(),
+                    updated_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+                    default_branch: 'main',
+                    license: { name: 'MIT License', spdx_id: 'MIT' },
+                    topics: ['ai', 'development', 'tracking', 'analytics']
+                },
+                {
+                    id: 2,
+                    name: 'portfolio-website',
+                    full_name: 'yourusername/portfolio-website',
+                    description: 'Personal portfolio showcasing projects and skills',
+                    html_url: 'https://github.com/yourusername/portfolio-website',
+                    language: 'React',
+                    stargazers_count: 28,
+                    forks_count: 5,
+                    open_issues_count: 0,
+                    private: false,
+                    fork: false,
+                    archived: false,
+                    size: 856,
+                    created_at: new Date(Date.now() - 120 * 24 * 60 * 60 * 1000).toISOString(),
+                    updated_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
+                    default_branch: 'main',
+                    license: { name: 'MIT License', spdx_id: 'MIT' },
+                    topics: ['portfolio', 'react', 'frontend']
+                },
+                {
+                    id: 3,
+                    name: 'api-gateway',
+                    full_name: 'yourusername/api-gateway',
+                    description: 'Microservices API gateway with authentication and routing',
+                    html_url: 'https://github.com/yourusername/api-gateway',
+                    language: 'Node.js',
+                    stargazers_count: 67,
+                    forks_count: 18,
+                    open_issues_count: 4,
+                    private: false,
+                    fork: false,
+                    archived: false,
+                    size: 2340,
+                    created_at: new Date(Date.now() - 200 * 24 * 60 * 60 * 1000).toISOString(),
+                    updated_at: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
+                    default_branch: 'main',
+                    license: { name: 'Apache License 2.0', spdx_id: 'Apache-2.0' },
+                    topics: ['api', 'gateway', 'microservices', 'nodejs']
+                },
+                {
+                    id: 4,
+                    name: 'ml-pipeline',
+                    full_name: 'yourusername/ml-pipeline',
+                    description: 'Machine learning model training and deployment pipeline',
+                    html_url: 'https://github.com/yourusername/ml-pipeline',
+                    language: 'Python',
+                    stargazers_count: 134,
+                    forks_count: 34,
+                    open_issues_count: 8,
+                    private: false,
+                    fork: false,
+                    archived: false,
+                    size: 3452,
+                    created_at: new Date(Date.now() - 250 * 24 * 60 * 60 * 1000).toISOString(),
+                    updated_at: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
+                    default_branch: 'main',
+                    license: { name: 'MIT License', spdx_id: 'MIT' },
+                    topics: ['machine-learning', 'python', 'pipeline', 'ml']
+                },
+                {
+                    id: 5,
+                    name: 'blog-cms',
+                    full_name: 'yourusername/blog-cms',
+                    description: 'Headless CMS for managing blog content',
+                    html_url: 'https://github.com/yourusername/blog-cms',
+                    language: 'Next.js',
+                    stargazers_count: 23,
+                    forks_count: 6,
+                    open_issues_count: 2,
+                    private: true,
+                    fork: false,
+                    archived: false,
+                    size: 945,
+                    created_at: new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString(),
+                    updated_at: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString(),
+                    default_branch: 'main',
+                    license: null,
+                    topics: ['cms', 'nextjs', 'blog']
+                },
+                {
+                    id: 6,
+                    name: 'mobile-app',
+                    full_name: 'yourusername/mobile-app',
+                    description: 'Cross-platform mobile application',
+                    html_url: 'https://github.com/yourusername/mobile-app',
+                    language: 'React Native',
+                    stargazers_count: 89,
+                    forks_count: 21,
+                    open_issues_count: 5,
+                    private: false,
+                    fork: false,
+                    archived: false,
+                    size: 1876,
+                    created_at: new Date(Date.now() - 150 * 24 * 60 * 60 * 1000).toISOString(),
+                    updated_at: new Date(Date.now() - 20 * 24 * 60 * 60 * 1000).toISOString(),
+                    default_branch: 'main',
+                    license: { name: 'MIT License', spdx_id: 'MIT' },
+                    topics: ['mobile', 'react-native', 'ios', 'android']
+                },
+                {
+                    id: 7,
+                    name: 'e-commerce-backend',
+                    full_name: 'yourusername/e-commerce-backend',
+                    description: 'Backend API for e-commerce platform',
+                    html_url: 'https://github.com/yourusername/e-commerce-backend',
+                    language: 'Java',
+                    stargazers_count: 56,
+                    forks_count: 15,
+                    open_issues_count: 6,
+                    private: true,
+                    fork: false,
+                    archived: false,
+                    size: 2890,
+                    created_at: new Date(Date.now() - 300 * 24 * 60 * 60 * 1000).toISOString(),
+                    updated_at: new Date(Date.now() - 25 * 24 * 60 * 60 * 1000).toISOString(),
+                    default_branch: 'main',
+                    license: null,
+                    topics: ['ecommerce', 'backend', 'java', 'spring-boot']
+                },
+                {
+                    id: 8,
+                    name: 'data-visualization-dashboard',
+                    full_name: 'yourusername/data-visualization-dashboard',
+                    description: 'Interactive data visualization dashboard with real-time updates',
+                    html_url: 'https://github.com/yourusername/data-visualization-dashboard',
+                    language: 'Vue.js',
+                    stargazers_count: 42,
+                    forks_count: 11,
+                    open_issues_count: 3,
+                    private: false,
+                    fork: false,
+                    archived: false,
+                    size: 1567,
+                    created_at: new Date(Date.now() - 100 * 24 * 60 * 60 * 1000).toISOString(),
+                    updated_at: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
+                    default_branch: 'main',
+                    license: { name: 'MIT License', spdx_id: 'MIT' },
+                    topics: ['visualization', 'dashboard', 'vue', 'charts']
+                }
+            ];
+            return res.json(mockRepos);
+        }
+
+        // Real GitHub API calls
+        const headers = getGithubHeaders(user.accessToken);
+        
+        const reposRes = await axios.get(
+            'https://api.github.com/user/repos?sort=updated&per_page=100&affiliation=owner,collaborator',
+            { headers }
+        );
+
+        res.json(reposRes.data);
+
+    } catch (error) {
+        console.error('Repositories Fetch Error:', error.message);
+        res.status(500).json({ message: 'Failed to fetch repositories' });
+    }
+};

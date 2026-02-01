@@ -20,5 +20,6 @@ const verifyToken = (req, res, next) => {
 router.get('/dashboard', verifyToken, githubController.getDashboardData);
 router.get('/connection-status', verifyToken, githubController.getConnectionStatus);
 router.get('/activity', verifyToken, githubController.getActivityData);
+router.get('/repos', verifyToken, githubController.getRepositories);
 
 module.exports = router;
