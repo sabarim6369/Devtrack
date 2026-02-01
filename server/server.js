@@ -1,14 +1,37 @@
+require('dotenv').config();
 const express = require('express');
-const dotenv = require('dotenv');
-const connectDB = require('./config/db');
-const userRoutes = require('./routes/userRoutes');
-
-dotenv.config();
-connectDB();
+const mongoose = require('mongoose');
+const cors = require('cors');
+const cookieParser = require('cookie-parser');
 
 const app = express();
-app.use(express.json());
-app.use('/api', userRoutes);
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+// Middleware
+app.use(cors({
+    origin: 'http://localhost:5173', // Vite default port
+    credentials: true
+}));
+app.use(express.json());
+app.use(cookieParser());
+
+// Database Connection
+mongoose.connect(process.env.MONGODB_URI)
+    .then(() => console.log('✅ Connected to MongoDB'))
+    .catch(err => console.error('❌ MongoDB Connection Error:', err));
+
+// Routes (Placeholder for now)
+app.get('/', (req, res) => {
+    res.send('DevTrack AI API is running...');
+});
+
+// Import Routes
+const authRoutes = require('./routes/auth');
+const githubRoutes = require('./routes/github');
+
+app.use('/api/auth', authRoutes);
+app.use('/api/github', githubRoutes);
+
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+    console.log(`🚀 Server running on port ${PORT}`);
+});

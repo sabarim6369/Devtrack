@@ -1,8 +1,10 @@
 import { Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Activity, Sparkles, Settings, User } from 'lucide-react';
+import { LayoutDashboard, Activity, Sparkles, Settings, User, LogOut } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 const Layout = ({ children }) => {
   const location = useLocation();
+  const { user, logout } = useAuth();
 
   const navItems = [
     { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard' },
@@ -52,14 +54,25 @@ const Layout = ({ children }) => {
         </nav>
 
         <div className="p-4 border-t border-white/5">
-          <button className="flex items-center space-x-3 px-4 py-3 w-full rounded-xl hover:bg-white/5 transition-colors text-gray-400 hover:text-white">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-gray-700 to-gray-600 flex items-center justify-center text-white font-bold text-xs">
-              M
-            </div>
+          <div className="flex items-center space-x-3 px-4 py-3 w-full rounded-xl bg-white/5 text-gray-400 mb-2">
+            {user?.avatarUrl ? (
+              <img src={user.avatarUrl} alt={user.name || user.username} className="w-8 h-8 rounded-full" />
+            ) : (
+              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-gray-700 to-gray-600 flex items-center justify-center text-white font-bold text-xs">
+                {(user?.name || user?.username || 'U')[0].toUpperCase()}
+              </div>
+            )}
             <div className="flex-1 text-left">
-              <div className="text-sm font-medium text-white">Mike Dev</div>
-              <div className="text-xs text-gray-500">Pro Plan</div>
+              <div className="text-sm font-medium text-white">{user?.name || user?.username || 'User'}</div>
+              <div className="text-xs text-gray-500">{user?.email || 'Pro Plan'}</div>
             </div>
+          </div>
+          <button 
+            onClick={logout}
+            className="flex items-center space-x-3 px-4 py-2 w-full rounded-xl hover:bg-red-500/10 transition-colors text-gray-400 hover:text-red-400"
+          >
+            <LogOut className="w-4 h-4" />
+            <span className="text-sm">Logout</span>
           </button>
         </div>
       </aside>

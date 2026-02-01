@@ -1,10 +1,11 @@
 import { Github, ArrowRight, Shield, CheckCircle2 } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import AuthLayout from '../components/AuthLayout';
 import Button from '../components/Button';
 import Card from '../components/Card';
 
 const ConnectAccount = () => {
+    const navigate = useNavigate();
     return (
         <AuthLayout
             title="Connect Your GitHub"
@@ -35,18 +36,27 @@ const ConnectAccount = () => {
                     </li>
                 </ul>
 
-                <Link to="/dashboard" className="block w-full">
+                <a href="http://localhost:5000/api/auth/github" className="block w-full">
                     <Button variant="primary" className="w-full justify-center group text-lg py-4" icon={Github}>
                         Connect GitHub Account
                         <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
                     </Button>
-                </Link>
+                </a>
 
                 <div className="mt-6 bg-blue-500/10 border border-blue-500/20 rounded-xl p-4 flex items-start space-x-3 text-left">
                     <Shield className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
                     <p className="text-xs text-blue-200 leading-relaxed">
                         Your privacy is our priority. We only analyze metadata and never store your actual source code.
                     </p>
+                </div>
+
+                <div className="mt-4 text-center">
+                    <button 
+                        onClick={() => navigate('/dashboard')}
+                        className="text-sm text-gray-400 hover:text-white transition-colors"
+                    >
+                        Skip for now →
+                    </button>
                 </div>
             </Card>
         </AuthLayout>
