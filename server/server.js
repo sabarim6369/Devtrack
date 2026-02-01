@@ -27,9 +27,11 @@ app.get('/', (req, res) => {
 // Import Routes
 const authRoutes = require('./routes/auth');
 const githubRoutes = require('./routes/github');
+const aiRoutes = require('./routes/ai');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/github', githubRoutes);
+app.use('/api/ai', aiRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
