@@ -2,7 +2,9 @@ import { useState, useEffect, useRef } from 'react';
 import { Brain, Sparkles, Battery, TrendingUp, Clock, Target, Zap, Send, AlertCircle, RefreshCw, 
          Code, GitBranch, GitCommit, Star, Users, BookOpen, MessageSquare, Lightbulb, 
          Activity, BarChart3, PieChart, Calendar, Award, TrendingDown, Maximize2, Minimize2,
-         ChevronDown, ChevronUp, Github, FolderGit2, Hash, Eye, GitPullRequest, Info } from 'lucide-react';
+         ChevronDown, ChevronUp, Github, FolderGit2, Hash, Eye, GitPullRequest, Info, 
+         Flame, Trophy, Coffee, Moon, Sun, Download, Share2, Filter, Search, 
+         ArrowUpRight, ArrowDownRight, Minus, CheckCircle2, XCircle, Timer, Shield, Lock } from 'lucide-react';
 import Card from '../components/Card';
 import axios from 'axios';
 
@@ -19,12 +21,16 @@ const AIInsights = () => {
   const [repos, setRepos] = useState([]);
   const [selectedRepo, setSelectedRepo] = useState(null);
   const [showChat, setShowChat] = useState(false);
+  const [timeRange, setTimeRange] = useState('week');
+  const [showExportMenu, setShowExportMenu] = useState(false);
+  const [animateStats, setAnimateStats] = useState(false);
   const chatEndRef = useRef(null);
   const chatContainerRef = useRef(null);
 
   useEffect(() => {
     fetchInsights();
     fetchRepositories();
+    setAnimateStats(true);
   }, []);
 
   useEffect(() => {
@@ -122,6 +128,48 @@ const AIInsights = () => {
     "Which repos need more attention?"
   ];
 
+  const exportReport = (format) => {
+    const reportData = {
+      generatedAt: new Date().toISOString(),
+      vitalityScore,
+      productivityScore,
+      burnoutLevel,
+      recommendations,
+      repos: repos.length,
+      timeRange
+    };
+
+    if (format === 'json') {
+      const blob = new Blob([JSON.stringify(reportData, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `dev-insights-${new Date().toISOString().split('T')[0]}.json`;
+      a.click();
+    } else if (format === 'text') {
+      const text = `
+Developer Insights Report
+Generated: ${new Date().toLocaleString()}
+==========================================
+
+Vitality Score: ${vitalityScore.score}/100
+Productivity Score: ${productivityScore.score}/100
+Energy Level: ${100 - burnoutLevel.level}%
+Repositories Analyzed: ${repos.length}
+
+Key Recommendations:
+${recommendations?.map((r, i) => `${i + 1}. ${r.message}`).join('\n') || 'None'}
+      `;
+      const blob = new Blob([text], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `dev-insights-${new Date().toISOString().split('T')[0]}.txt`;
+      a.click();
+    }
+    setShowExportMenu(false);
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen p-4 md:p-8 flex items-center justify-center">
@@ -165,34 +213,102 @@ const AIInsights = () => {
   const { vitalityScore, productivityScore, burnoutLevel, deepWorkClock, focusBalance, recommendations, cognitiveLoadPattern, insightsData } = insights;
 
   return (
-    <div className="min-h-screen p-4 md:p-8 pb-32 relative">
-      {/* Enhanced Header */}
-      <div className="mb-8">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div>
-            <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 text-transparent bg-clip-text mb-3 font-outfit">
-              AI-Powered Insights Dashboard
-            </h1>
-            <div className="flex items-center gap-4 flex-wrap">
-              <p className="text-gray-400 flex items-center gap-2">
+    <div className="min-h-screen p-4 md:p-8 pb-32 relative overflow-x-hidden">
+      {/* Animated Background */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute top-20 left-10 w-72 h-72 bg-blue-500/10 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-20 right-10 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
+        <div className="absolute top-1/2 left-1/2 w-80 h-80 bg-pink-500/5 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
+      </div>
+
+      {/* Enhanced Header with Stats Bar */}
+      <div className="mb-8 relative z-10">
+        <div className="flex flex-col md:flex-row md:items-start justify-between gap-4 mb-6">
+          <div className="flex-1">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="relative">
+                <Brain className="w-10 h-10 text-blue-400" />
+                <Sparkles className="w-4 h-4 text-purple-400 absolute -top-1 -right-1 animate-pulse" />
+              </div>
+              <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 text-transparent bg-clip-text font-outfit">
+                AI Insights Studio
+              </h1>
+            </div>
+            <div className="flex items-center gap-4 flex-wrap mt-3">
+              <div className="flex items-center gap-2 px-3 py-1.5 bg-white/5 rounded-lg border border-white/10">
                 {mode === 'mock' ? (
-                  <><Brain className="w-4 h-4 text-yellow-400" /> Demo Mode - Sample Data</>
+                  <>
+                    <Brain className="w-4 h-4 text-yellow-400" />
+                    <span className="text-sm text-gray-300">Demo Mode</span>
+                  </>
                 ) : (
-                  <><Sparkles className="w-4 h-4 text-blue-400 animate-pulse" /> Real-time AI Analysis</>
+                  <>
+                    <Sparkles className="w-4 h-4 text-blue-400 animate-pulse" />
+                    <span className="text-sm text-gray-300">Live Analysis</span>
+                  </>
                 )}
-              </p>
-              <span className="text-gray-600">•</span>
-              <p className="text-gray-500 text-sm">{repos.length} repositories analyzed</p>
+              </div>
+              <div className="flex items-center gap-2 px-3 py-1.5 bg-white/5 rounded-lg border border-white/10">
+                <FolderGit2 className="w-4 h-4 text-green-400" />
+                <span className="text-sm text-gray-300">{repos.length} repos</span>
+              </div>
+              <div className="flex items-center gap-2 px-3 py-1.5 bg-white/5 rounded-lg border border-white/10">
+                <Clock className="w-4 h-4 text-purple-400" />
+                <span className="text-sm text-gray-300">Last updated: {new Date().toLocaleTimeString()}</span>
+              </div>
             </div>
           </div>
-          <div className="flex gap-3">
+          
+          <div className="flex gap-3 flex-wrap">
+            {/* Time Range Selector */}
+            <select
+              value={timeRange}
+              onChange={(e) => setTimeRange(e.target.value)}
+              className="px-4 py-2.5 bg-white/5 hover:bg-white/10 text-white rounded-xl transition-all border border-white/10 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="day">Today</option>
+              <option value="week">This Week</option>
+              <option value="month">This Month</option>
+              <option value="year">This Year</option>
+            </select>
+
+            {/* Export Menu */}
+            <div className="relative">
+              <button
+                onClick={() => setShowExportMenu(!showExportMenu)}
+                className="px-5 py-2.5 bg-white/5 hover:bg-white/10 text-white rounded-xl transition-all flex items-center space-x-2 border border-white/10"
+              >
+                <Download className="w-4 h-4" />
+                <span className="font-medium">Export</span>
+              </button>
+              {showExportMenu && (
+                <div className="absolute right-0 mt-2 w-48 bg-gray-900 border border-white/10 rounded-xl shadow-xl overflow-hidden z-50">
+                  <button
+                    onClick={() => exportReport('json')}
+                    className="w-full px-4 py-3 text-left text-white hover:bg-white/10 transition-colors flex items-center gap-2"
+                  >
+                    <Code className="w-4 h-4 text-blue-400" />
+                    Export as JSON
+                  </button>
+                  <button
+                    onClick={() => exportReport('text')}
+                    className="w-full px-4 py-3 text-left text-white hover:bg-white/10 transition-colors flex items-center gap-2"
+                  >
+                    <BookOpen className="w-4 h-4 text-green-400" />
+                    Export as Text
+                  </button>
+                </div>
+              )}
+            </div>
+
             <button
               onClick={() => setShowChat(!showChat)}
-              className="px-5 py-2.5 bg-white/5 hover:bg-white/10 text-white rounded-xl transition-all flex items-center space-x-2 border border-white/10"
+              className="px-5 py-2.5 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white rounded-xl transition-all flex items-center space-x-2 shadow-lg"
             >
               <MessageSquare className="w-4 h-4" />
-              <span className="font-medium">AI Chat</span>
+              <span className="font-medium">AI Assistant</span>
             </button>
+            
             <button
               onClick={fetchInsights}
               className="px-5 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-xl transition-all flex items-center space-x-2 shadow-lg hover:shadow-xl"
@@ -202,14 +318,43 @@ const AIInsights = () => {
             </button>
           </div>
         </div>
+
+        {/* Quick Stats Bar */}
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
+          {[
+            { label: 'Vitality', value: vitalityScore?.score || 0, icon: Brain, color: 'blue', suffix: '/100' },
+            { label: 'Productivity', value: productivityScore?.score || 0, icon: Zap, color: 'purple', suffix: '/100' },
+            { label: 'Energy', value: (100 - (burnoutLevel?.level || 0)), icon: Battery, color: 'green', suffix: '%' },
+            { label: 'Focus Time', value: deepWorkClock?.totalHours || 0, icon: Clock, color: 'yellow', suffix: 'h' },
+            { label: 'Active Repos', value: repos.length, icon: FolderGit2, color: 'pink', suffix: '' },
+            { label: 'Recommendations', value: recommendations?.length || 0, icon: Lightbulb, color: 'orange', suffix: '' },
+          ].map((stat, idx) => (
+            <div
+              key={idx}
+              className={`bg-white/5 backdrop-blur-sm p-4 rounded-xl border border-white/10 hover:bg-white/10 transition-all ${
+                animateStats ? 'animate-fade-in' : ''
+              }`}
+              style={{ animationDelay: `${idx * 100}ms` }}
+            >
+              <div className="flex items-center justify-between mb-2">
+                <stat.icon className={`w-4 h-4 text-${stat.color}-400`} />
+                <span className="text-xs text-gray-500 uppercase tracking-wider">{stat.label}</span>
+              </div>
+              <p className="text-2xl font-bold text-white">
+                {stat.value}<span className="text-sm text-gray-400">{stat.suffix}</span>
+              </p>
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* Tab Navigation */}
-      <div className="mb-6 flex gap-2 overflow-x-auto pb-2 scrollbar-thin">
+      <div className="mb-6 flex gap-2 overflow-x-auto pb-2 scrollbar-thin relative z-10">
         {[
           { id: 'overview', label: 'Overview', icon: BarChart3 },
           { id: 'insights', label: 'Deep Insights', icon: Brain },
-          { id: 'activity', label: 'Activity Heatmap', icon: Calendar },
+          { id: 'activity', label: 'Activity Matrix', icon: Calendar },
+          { id: 'performance', label: 'Performance', icon: TrendingUp },
           { id: 'advanced', label: 'Advanced Analytics', icon: Award },
           { id: 'repos', label: 'Repositories', icon: FolderGit2 },
         ].map(tab => (
@@ -218,8 +363,8 @@ const AIInsights = () => {
             onClick={() => setActiveTab(tab.id)}
             className={`px-6 py-3 rounded-xl font-medium transition-all flex items-center gap-2 whitespace-nowrap ${
               activeTab === tab.id
-                ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg'
-                : 'bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white'
+                ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg scale-105'
+                : 'bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white hover:scale-105'
             }`}
           >
             <tab.icon className="w-4 h-4" />
@@ -230,98 +375,196 @@ const AIInsights = () => {
 
       {/* Overview Tab */}
       {activeTab === 'overview' && (
-        <>
+        <div className="relative z-10">
           {/* Top Metrics Grid */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
             
             {/* Vitality Score */}
-            <Card className="p-6 bg-gradient-to-br from-blue-500/10 to-purple-500/10 border-blue-500/20">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center space-x-2">
-                  <Brain className="w-5 h-5 text-blue-400" />
-                  <h3 className="text-sm font-bold text-white font-outfit">Developer Vitality</h3>
+            <Card className="p-6 bg-gradient-to-br from-blue-500/10 to-purple-500/10 border-blue-500/20 hover:scale-105 transition-transform duration-300 relative overflow-hidden group">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 rounded-full blur-2xl group-hover:bg-blue-500/20 transition-all"></div>
+              <div className="relative z-10">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center space-x-2">
+                    <div className="p-2 bg-blue-500/20 rounded-lg">
+                      <Brain className="w-5 h-5 text-blue-400" />
+                    </div>
+                    <h3 className="text-sm font-bold text-white font-outfit">Developer Vitality</h3>
+                  </div>
+                  <div className={`p-1.5 rounded-full ${
+                    vitalityScore.trend === 'up' ? 'bg-green-500/20' : 
+                    vitalityScore.trend === 'down' ? 'bg-red-500/20' : 'bg-yellow-500/20'
+                  }`}>
+                    {vitalityScore.trend === 'up' ? <ArrowUpRight className="w-4 h-4 text-green-400" /> :
+                     vitalityScore.trend === 'down' ? <ArrowDownRight className="w-4 h-4 text-red-400" /> :
+                     <Minus className="w-4 h-4 text-yellow-400" />}
+                  </div>
                 </div>
-                <TrendingUp className={`w-4 h-4 ${
-                  vitalityScore.trend === 'up' ? 'text-green-400' : 
-                  vitalityScore.trend === 'down' ? 'text-red-400' : 'text-yellow-400'
-                }`} />
-              </div>
-              
-              <div className="text-center">
-                <div className="text-4xl font-bold text-white mb-2">
-                  {vitalityScore.score}
-                  <span className="text-xl text-gray-400">/100</span>
-                </div>
-                <div className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${
-                  vitalityScore.trend === 'up' ? 'bg-green-500/20 text-green-400' :
-                  vitalityScore.trend === 'down' ? 'bg-red-500/20 text-red-400' :
-                  'bg-yellow-500/20 text-yellow-400'
-                }`}>
-                  {vitalityScore.trend === 'up' ? '↗ Improving' :
-                   vitalityScore.trend === 'down' ? '↘ Declining' :
-                   '→ Stable'}
+                
+                <div className="text-center py-4">
+                  <div className="relative inline-block">
+                    <svg className="w-32 h-32 transform -rotate-90">
+                      <circle
+                        cx="64"
+                        cy="64"
+                        r="56"
+                        stroke="currentColor"
+                        strokeWidth="8"
+                        fill="none"
+                        className="text-white/10"
+                      />
+                      <circle
+                        cx="64"
+                        cy="64"
+                        r="56"
+                        stroke="url(#gradient1)"
+                        strokeWidth="8"
+                        fill="none"
+                        strokeDasharray={`${2 * Math.PI * 56}`}
+                        strokeDashoffset={`${2 * Math.PI * 56 * (1 - vitalityScore.score / 100)}`}
+                        className="transition-all duration-1000"
+                        strokeLinecap="round"
+                      />
+                      <defs>
+                        <linearGradient id="gradient1" x1="0%" y1="0%" x2="100%" y2="100%">
+                          <stop offset="0%" stopColor="#3b82f6" />
+                          <stop offset="100%" stopColor="#a855f7" />
+                        </linearGradient>
+                      </defs>
+                    </svg>
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="text-center">
+                        <div className="text-3xl font-bold text-white">
+                          {vitalityScore.score}
+                        </div>
+                        <div className="text-xs text-gray-400">out of 100</div>
+                      </div>
+                    </div>
+                  </div>
+                  <div className={`inline-flex items-center gap-1 mt-3 px-3 py-1 rounded-full text-xs font-semibold ${
+                    vitalityScore.trend === 'up' ? 'bg-green-500/20 text-green-400' :
+                    vitalityScore.trend === 'down' ? 'bg-red-500/20 text-red-400' :
+                    'bg-yellow-500/20 text-yellow-400'
+                  }`}>
+                    {vitalityScore.trend === 'up' ? '↗ Improving' :
+                     vitalityScore.trend === 'down' ? '↘ Needs Attention' :
+                     '→ Stable'}
+                  </div>
                 </div>
               </div>
             </Card>
 
             {/* Productivity Score */}
-            <Card className="p-6 bg-gradient-to-br from-purple-500/10 to-pink-500/10 border-purple-500/20">
-              <div className="flex items-center space-x-2 mb-4">
-                <Sparkles className="w-5 h-5 text-purple-400" />
-                <h3 className="text-sm font-bold text-white font-outfit">Productivity</h3>
-              </div>
-              
-              <div className="text-center">
-                <div className="text-4xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 text-transparent bg-clip-text mb-2">
-                  {productivityScore.score}
-                  <span className="text-xl text-gray-400">/100</span>
+            <Card className="p-6 bg-gradient-to-br from-purple-500/10 to-pink-500/10 border-purple-500/20 hover:scale-105 transition-transform duration-300 relative overflow-hidden group">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/10 rounded-full blur-2xl group-hover:bg-purple-500/20 transition-all"></div>
+              <div className="relative z-10">
+                <div className="flex items-center space-x-2 mb-4">
+                  <div className="p-2 bg-purple-500/20 rounded-lg">
+                    <Sparkles className="w-5 h-5 text-purple-400 animate-pulse" />
+                  </div>
+                  <h3 className="text-sm font-bold text-white font-outfit">Productivity</h3>
                 </div>
-                <p className="text-xs text-gray-400">{productivityScore.factors?.[0]}</p>
+                
+                <div className="text-center py-4">
+                  <div className="relative inline-block mb-4">
+                    <div className="text-5xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 text-transparent bg-clip-text">
+                      {productivityScore.score}
+                    </div>
+                    <div className="text-sm text-gray-400 mt-1">Performance Index</div>
+                  </div>
+                  <div className="space-y-2">
+                    {productivityScore.factors?.slice(0, 2).map((factor, idx) => (
+                      <div key={idx} className="text-xs text-gray-400 flex items-center gap-2">
+                        <CheckCircle2 className="w-3 h-3 text-purple-400" />
+                        <span className="truncate">{factor}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
             </Card>
 
             {/* Sustainability */}
-            <Card className="p-6 bg-gradient-to-br from-green-500/10 to-emerald-500/10 border-green-500/20">
-              <div className="flex items-center space-x-2 mb-4">
-                <Battery className="w-5 h-5 text-green-400" />
-                <h3 className="text-sm font-bold text-white font-outfit">Energy Level</h3>
-              </div>
-
-              <div className="text-center">
-                <div className="text-4xl font-bold text-white mb-2">
-                  {100 - burnoutLevel.level}%
+            <Card className="p-6 bg-gradient-to-br from-green-500/10 to-emerald-500/10 border-green-500/20 hover:scale-105 transition-transform duration-300 relative overflow-hidden group">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-green-500/10 rounded-full blur-2xl group-hover:bg-green-500/20 transition-all"></div>
+              <div className="relative z-10">
+                <div className="flex items-center space-x-2 mb-4">
+                  <div className="p-2 bg-green-500/20 rounded-lg">
+                    <Battery className="w-5 h-5 text-green-400" />
+                  </div>
+                  <h3 className="text-sm font-bold text-white font-outfit">Energy Level</h3>
                 </div>
-                <div className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${
-                  burnoutLevel.risk === 'high' ? 'bg-red-500/20 text-red-400' :
-                  burnoutLevel.risk === 'medium' ? 'bg-yellow-500/20 text-yellow-400' :
-                  'bg-green-500/20 text-green-400'
-                }`}>
-                  {burnoutLevel.risk === 'high' ? '⚠️ High Risk' :
-                   burnoutLevel.risk === 'medium' ? '⚡ Moderate' :
-                   '✅ Healthy'}
+
+                <div className="text-center py-4">
+                  <div className="relative mb-4">
+                    <div className="text-5xl font-bold text-white">
+                      {100 - burnoutLevel.level}%
+                    </div>
+                    <div className="text-sm text-gray-400 mt-1">Remaining Energy</div>
+                  </div>
+                  
+                  {/* Battery Visualization */}
+                  <div className="relative w-full h-8 bg-white/5 rounded-full overflow-hidden border-2 border-white/20">
+                    <div
+                      className={`h-full rounded-full transition-all duration-1000 ${
+                        burnoutLevel.risk === 'high' ? 'bg-gradient-to-r from-red-500 to-red-600' :
+                        burnoutLevel.risk === 'medium' ? 'bg-gradient-to-r from-yellow-500 to-yellow-600' :
+                        'bg-gradient-to-r from-green-500 to-green-600'
+                      }`}
+                      style={{ width: `${100 - burnoutLevel.level}%` }}
+                    >
+                      <div className="w-full h-full animate-pulse opacity-50 bg-white"></div>
+                    </div>
+                  </div>
+                  
+                  <div className={`inline-flex items-center gap-2 mt-3 px-3 py-1 rounded-full text-xs font-semibold ${
+                    burnoutLevel.risk === 'high' ? 'bg-red-500/20 text-red-400' :
+                    burnoutLevel.risk === 'medium' ? 'bg-yellow-500/20 text-yellow-400' :
+                    'bg-green-500/20 text-green-400'
+                  }`}>
+                    {burnoutLevel.risk === 'high' ? <AlertCircle className="w-3 h-3" /> :
+                     burnoutLevel.risk === 'medium' ? <Clock className="w-3 h-3" /> :
+                     <CheckCircle2 className="w-3 h-3" />}
+                    {burnoutLevel.risk === 'high' ? 'High Risk' :
+                     burnoutLevel.risk === 'medium' ? 'Moderate' :
+                     'Healthy'}
+                  </div>
                 </div>
               </div>
             </Card>
 
             {/* Quick Stats */}
-            <Card className="p-6 bg-gradient-to-br from-yellow-500/10 to-orange-500/10 border-yellow-500/20">
-              <div className="flex items-center space-x-2 mb-4">
-                <Activity className="w-5 h-5 text-yellow-400" />
-                <h3 className="text-sm font-bold text-white font-outfit">Activity</h3>
-              </div>
-              
-              <div className="space-y-3">
-                <div className="flex justify-between items-center">
-                  <span className="text-xs text-gray-400">Repositories</span>
-                  <span className="text-sm font-bold text-white">{repos.length}</span>
+            <Card className="p-6 bg-gradient-to-br from-yellow-500/10 to-orange-500/10 border-yellow-500/20 hover:scale-105 transition-transform duration-300 relative overflow-hidden group">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-yellow-500/10 rounded-full blur-2xl group-hover:bg-yellow-500/20 transition-all"></div>
+              <div className="relative z-10">
+                <div className="flex items-center space-x-2 mb-4">
+                  <div className="p-2 bg-yellow-500/20 rounded-lg">
+                    <Activity className="w-5 h-5 text-yellow-400" />
+                  </div>
+                  <h3 className="text-sm font-bold text-white font-outfit">Activity Stats</h3>
                 </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-xs text-gray-400">Peak Hour</span>
-                  <span className="text-sm font-bold text-white">{deepWorkClock?.peakHours?.[0] || 14}:00</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-xs text-gray-400">Focus Area</span>
-                  <span className="text-sm font-bold text-white capitalize">{focusBalance?.recommendation || 'Balanced'}</span>
+                
+                <div className="space-y-4 py-2">
+                  <div className="flex justify-between items-center p-2 bg-white/5 rounded-lg">
+                    <div className="flex items-center gap-2">
+                      <FolderGit2 className="w-4 h-4 text-yellow-400" />
+                      <span className="text-xs text-gray-400">Repositories</span>
+                    </div>
+                    <span className="text-lg font-bold text-white">{repos.length}</span>
+                  </div>
+                  <div className="flex justify-between items-center p-2 bg-white/5 rounded-lg">
+                    <div className="flex items-center gap-2">
+                      <Flame className="w-4 h-4 text-orange-400" />
+                      <span className="text-xs text-gray-400">Peak Hour</span>
+                    </div>
+                    <span className="text-lg font-bold text-white">{deepWorkClock?.peakHours?.[0] || 14}:00</span>
+                  </div>
+                  <div className="flex justify-between items-center p-2 bg-white/5 rounded-lg">
+                    <div className="flex items-center gap-2">
+                      <Target className="w-4 h-4 text-green-400" />
+                      <span className="text-xs text-gray-400">Focus Area</span>
+                    </div>
+                    <span className="text-sm font-bold text-white capitalize">{focusBalance?.recommendation || 'Balanced'}</span>
+                  </div>
                 </div>
               </div>
             </Card>
@@ -484,7 +727,7 @@ const AIInsights = () => {
               </div>
             </Card>
           </div>
-        </>
+        </div>
       )}
 
       {/* Deep Insights Tab */}
@@ -774,6 +1017,235 @@ const AIInsights = () => {
               })}
             </div>
           </Card>
+        </div>
+      )}
+
+      {/* Performance Tab - NEW */}
+      {activeTab === 'performance' && (
+        <div className="space-y-6 relative z-10">
+          {/* Performance Dashboard Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Code Quality Score */}
+            <Card className="p-6 bg-gradient-to-br from-indigo-500/10 to-blue-500/10 border-indigo-500/20">
+              <h3 className="text-2xl font-bold text-white mb-6 flex items-center gap-2">
+                <Code className="w-6 h-6 text-indigo-400" />
+                Code Quality Score
+              </h3>
+              
+              <div className="flex items-center justify-center mb-6">
+                <div className="relative">
+                  <svg className="w-48 h-48 transform -rotate-90">
+                    <circle cx="96" cy="96" r="88" stroke="currentColor" strokeWidth="12" fill="none" className="text-white/10" />
+                    <circle
+                      cx="96"
+                      cy="96"
+                      r="88"
+                      stroke="url(#qualityGradient)"
+                      strokeWidth="12"
+                      fill="none"
+                      strokeDasharray={`${2 * Math.PI * 88}`}
+                      strokeDashoffset={`${2 * Math.PI * 88 * (1 - 0.87)}`}
+                      className="transition-all duration-1000"
+                      strokeLinecap="round"
+                    />
+                    <defs>
+                      <linearGradient id="qualityGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stopColor="#6366f1" />
+                        <stop offset="100%" stopColor="#3b82f6" />
+                      </linearGradient>
+                    </defs>
+                  </svg>
+                  <div className="absolute inset-0 flex flex-col items-center justify-center">
+                    <div className="text-5xl font-bold text-white">87</div>
+                    <div className="text-sm text-gray-400">Excellent</div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                {[
+                  { label: 'Maintainability', value: 92, icon: CheckCircle2 },
+                  { label: 'Reliability', value: 85, icon: Shield },
+                  { label: 'Security', value: 89, icon: Lock },
+                  { label: 'Coverage', value: 78, icon: Target },
+                ].map((metric, idx) => (
+                  <div key={idx} className="p-3 bg-white/5 rounded-lg">
+                    <div className="flex items-center gap-2 mb-2">
+                      <metric.icon className="w-4 h-4 text-indigo-400" />
+                      <span className="text-xs text-gray-400">{metric.label}</span>
+                    </div>
+                    <div className="flex items-end gap-1">
+                      <span className="text-2xl font-bold text-white">{metric.value}</span>
+                      <span className="text-xs text-gray-500 mb-1">%</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </Card>
+
+            {/* Performance Metrics */}
+            <Card className="p-6 bg-gradient-to-br from-emerald-500/10 to-green-500/10 border-emerald-500/20">
+              <h3 className="text-2xl font-bold text-white mb-6 flex items-center gap-2">
+                <Zap className="w-6 h-6 text-emerald-400" />
+                Development Velocity
+              </h3>
+
+              <div className="space-y-6">
+                {[
+                  { label: 'Commits/Week', current: 32, previous: 28, icon: GitCommit, color: 'blue' },
+                  { label: 'PRs Merged', current: 8, previous: 6, icon: GitPullRequest, color: 'purple' },
+                  { label: 'Issues Closed', current: 12, previous: 15, icon: CheckCircle2, color: 'green' },
+                  { label: 'Code Reviews', current: 18, previous: 14, icon: Eye, color: 'yellow' },
+                ].map((metric, idx) => {
+                  const change = ((metric.current - metric.previous) / metric.previous * 100).toFixed(1);
+                  const isPositive = metric.current > metric.previous;
+                  return (
+                    <div key={idx} className="p-4 bg-white/5 rounded-xl border border-white/5">
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center gap-3">
+                          <div className={`p-2 bg-${metric.color}-500/20 rounded-lg`}>
+                            <metric.icon className={`w-5 h-5 text-${metric.color}-400`} />
+                          </div>
+                          <span className="text-white font-medium">{metric.label}</span>
+                        </div>
+                        <div className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs font-bold ${
+                          isPositive ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'
+                        }`}>
+                          {isPositive ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
+                          {Math.abs(parseFloat(change))}%
+                        </div>
+                      </div>
+                      <div className="flex items-end gap-2">
+                        <span className="text-3xl font-bold text-white">{metric.current}</span>
+                        <span className="text-sm text-gray-500 mb-1">vs {metric.previous} last week</span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </Card>
+          </div>
+
+          {/* Response Time Analytics */}
+          <Card className="p-6">
+            <h3 className="text-2xl font-bold text-white mb-6 flex items-center gap-2">
+              <Timer className="w-6 h-6 text-pink-400" />
+              Response & Review Times
+            </h3>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {[
+                { 
+                  label: 'Avg PR Review Time', 
+                  value: '2.4', 
+                  unit: 'hours', 
+                  status: 'excellent',
+                  description: '45% faster than team average',
+                  icon: Eye
+                },
+                { 
+                  label: 'First Response Time', 
+                  value: '18', 
+                  unit: 'minutes', 
+                  status: 'good',
+                  description: 'Quick initial feedback',
+                  icon: MessageSquare
+                },
+                { 
+                  label: 'PR Merge Time', 
+                  value: '4.2', 
+                  unit: 'hours', 
+                  status: 'average',
+                  description: 'From approval to merge',
+                  icon: GitBranch
+                },
+              ].map((metric, idx) => (
+                <div key={idx} className="p-6 bg-white/5 rounded-xl border border-white/10 hover:bg-white/10 transition-all">
+                  <div className={`inline-flex p-3 rounded-xl mb-4 ${
+                    metric.status === 'excellent' ? 'bg-green-500/20' :
+                    metric.status === 'good' ? 'bg-blue-500/20' : 'bg-yellow-500/20'
+                  }`}>
+                    <metric.icon className={`w-6 h-6 ${
+                      metric.status === 'excellent' ? 'text-green-400' :
+                      metric.status === 'good' ? 'text-blue-400' : 'text-yellow-400'
+                    }`} />
+                  </div>
+                  <h4 className="text-gray-400 text-sm mb-2">{metric.label}</h4>
+                  <div className="flex items-end gap-2 mb-2">
+                    <span className="text-4xl font-bold text-white">{metric.value}</span>
+                    <span className="text-lg text-gray-500 mb-1">{metric.unit}</span>
+                  </div>
+                  <p className="text-xs text-gray-500">{metric.description}</p>
+                </div>
+              ))}
+            </div>
+          </Card>
+
+          {/* Productivity Patterns */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <Card className="p-6">
+              <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
+                <Flame className="w-5 h-5 text-orange-400" />
+                Productivity Patterns
+              </h3>
+              
+              <div className="space-y-4">
+                {[
+                  { day: 'Monday', productivity: 75, commits: 8 },
+                  { day: 'Tuesday', productivity: 88, commits: 12 },
+                  { day: 'Wednesday', productivity: 92, commits: 15 },
+                  { day: 'Thursday', productivity: 85, commits: 11 },
+                  { day: 'Friday', productivity: 68, commits: 6 },
+                  { day: 'Saturday', productivity: 45, commits: 3 },
+                  { day: 'Sunday', productivity: 35, commits: 2 },
+                ].map((day, idx) => (
+                  <div key={idx} className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-300">{day.day}</span>
+                      <div className="flex items-center gap-3">
+                        <span className="text-xs text-gray-500">{day.commits} commits</span>
+                        <span className="text-sm font-bold text-white">{day.productivity}%</span>
+                      </div>
+                    </div>
+                    <div className="h-2 bg-white/5 rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-gradient-to-r from-orange-500 to-pink-500 rounded-full transition-all duration-500"
+                        style={{ width: `${day.productivity}%` }}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </Card>
+
+            <Card className="p-6">
+              <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
+                <Trophy className="w-5 h-5 text-yellow-400" />
+                Achievements & Milestones
+              </h3>
+              
+              <div className="space-y-3">
+                {[
+                  { title: '100+ Commits Milestone', date: '2 days ago', icon: Star, color: 'yellow' },
+                  { title: 'Code Quality Master', date: '1 week ago', icon: Award, color: 'purple' },
+                  { title: '30 Day Streak', date: '3 days ago', icon: Flame, color: 'orange' },
+                  { title: 'Team Contributor', date: '5 days ago', icon: Users, color: 'blue' },
+                  { title: 'Bug Crusher', date: '1 week ago', icon: CheckCircle2, color: 'green' },
+                ].map((achievement, idx) => (
+                  <div key={idx} className="flex items-center gap-4 p-4 bg-white/5 rounded-lg hover:bg-white/10 transition-all border border-white/5">
+                    <div className={`p-3 rounded-xl bg-${achievement.color}-500/20`}>
+                      <achievement.icon className={`w-5 h-5 text-${achievement.color}-400`} />
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="text-white font-medium">{achievement.title}</h4>
+                      <p className="text-xs text-gray-500">{achievement.date}</p>
+                    </div>
+                    <Sparkles className="w-4 h-4 text-yellow-400" />
+                  </div>
+                ))}
+              </div>
+            </Card>
+          </div>
         </div>
       )}
 
