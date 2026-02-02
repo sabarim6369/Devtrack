@@ -44,6 +44,33 @@ exports.getConnectionStatus = async (req, res) => {
     }
 };
 
+// Unlink GitHub Account
+exports.unlinkGithubAccount = async (req, res) => {
+    try {
+        const user = await User.findById(req.user.id);
+        
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        // Clear GitHub-related data
+        user.githubId = undefined;
+        user.accessToken = undefined;
+        user.avatarUrl = undefined;
+        user.lastSynced = undefined;
+        
+        await user.save();
+        
+        res.json({ 
+            success: true, 
+            message: 'GitHub account unlinked successfully' 
+        });
+    } catch (error) {
+        console.error('Unlink Error:', error.message);
+        res.status(500).json({ message: 'Failed to unlink GitHub account' });
+    }
+};
+
 exports.getDashboardData = async (req, res) => {
     try {
         const user = await User.findById(req.user.id).select('+accessToken');
