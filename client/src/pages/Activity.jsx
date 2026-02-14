@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import Card from '../components/Card';
+import { API_URL } from '../api';
 import { 
   GitCommit, 
   Calendar, 
@@ -24,7 +25,7 @@ const Activity = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/github/activity', {
+        const response = await axios.get(`${API_URL}/api/github/activity`, {
           withCredentials: true
         });
         setData(response.data);

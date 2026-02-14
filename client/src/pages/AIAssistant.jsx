@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Brain, Send, Sparkles, Loader2, User, Bot, Lightbulb, Code, TrendingUp, Clock, AlertCircle } from 'lucide-react';
 import Card from '../components/Card';
+import { API_URL } from '../api';
 import axios from 'axios';
 
 const AIAssistant = () => {
@@ -61,7 +62,7 @@ const AIAssistant = () => {
     setIsTyping(true);
 
     try {
-      const response = await axios.post('http://localhost:5000/api/ai/chat', 
+      const response = await axios.post(`${API_URL}/api/ai/chat`, 
         { message: userMessage },
         { withCredentials: true }
       );

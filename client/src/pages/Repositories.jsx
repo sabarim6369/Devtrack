@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { API_URL } from '../api';
 import Card from '../components/Card';
 import { 
   FolderGit2, Star, GitFork, AlertCircle, Code, Eye, GitBranch, 
@@ -37,7 +38,7 @@ const Repositories = () => {
   const fetchRepositories = async () => {
     setLoading(true);
     try {
-      const response = await axios.get('http://localhost:5000/api/github/repos', {
+      const response = await axios.get(`${API_URL}/api/github/repos`, {
         withCredentials: true
       });
       setRepos(response.data || []);

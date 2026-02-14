@@ -1,6 +1,7 @@
 import Card from '../components/Card';
 import Button from '../components/Button';
 import { Github, Moon, Sun, LogOut, CheckCircle2, User, Bell, Shield, AlertCircle, RefreshCw, X, Check, Trash2, Plus, Globe, Mail, Lock, Key, Settings as SettingsIcon, ChevronRight } from 'lucide-react';
+import { API_URL } from '../api';
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useGithubConnection } from '../hooks/useGithubConnection';
@@ -29,7 +30,7 @@ const Settings = () => {
   const fetchUserProfile = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('http://localhost:5000/api/user/profile', {
+      const response = await axios.get(`${API_URL}/api/user/profile`, {
         withCredentials: true
       });
       setUserProfile(response.data);
@@ -42,7 +43,7 @@ const Settings = () => {
 
   const fetchAccountStats = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/github/dashboard', {
+      const response = await axios.get(`${API_URL}/api/github/dashboard`, {
         withCredentials: true
       });
       setAccountStats(response.data.stats);
@@ -54,7 +55,7 @@ const Settings = () => {
   const handleUnlinkAccount = async () => {
     setUnlinking(true);
     try {
-      const response = await axios.post('http://localhost:5000/api/github/unlink', {}, {
+      const response = await axios.post(`${API_URL}/api/github/unlink`, {}, {
         withCredentials: true
       });
       if (response.data.success) {
@@ -73,7 +74,7 @@ const Settings = () => {
 
   const handleAddGithubAccount = () => {
     // Redirect to GitHub OAuth
-    window.location.href = 'http://localhost:5000/api/auth/github';
+    window.location.href = `${API_URL}/api/auth/github`;
   };
 
   const formatDate = (dateString) => {
@@ -224,7 +225,7 @@ const Settings = () => {
                 <div className="flex flex-col gap-2">
                   <Button
                     variant="ghost"
-                    onClick={() => window.location.href = 'http://localhost:5000/api/auth/github'}
+                    onClick={() => window.location.href = `${API_URL}/api/auth/github`}
                     className="text-sm flex items-center gap-2 bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/30"
                   >
                     <RefreshCw className="w-4 h-4" />

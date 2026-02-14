@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Mail, Lock, Github, ArrowRight } from 'lucide-react';
 import AuthLayout from '../components/AuthLayout';
 import Input from '../components/Input';
+import { API_URL } from '../api';
 import Button from '../components/Button';
 import Card from '../components/Card';
 import { useAuth } from '../context/AuthContext';
@@ -99,7 +100,7 @@ const Login = () => {
                         </div>
                     </div>
 
-                    <a href="http://localhost:5000/api/auth/github">
+                    <a href={`${API_URL}/api/auth/github`}>
                         <Button type="button" variant="secondary" className="w-full justify-center" icon={Github}>
                             GitHub
                         </Button>

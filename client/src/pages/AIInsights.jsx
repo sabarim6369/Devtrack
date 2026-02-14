@@ -7,6 +7,7 @@ import { Brain, Sparkles, Battery, TrendingUp, Clock, Target, Zap, Send, AlertCi
          ArrowUpRight, ArrowDownRight, Minus, CheckCircle2, XCircle, Timer, Shield, Lock } from 'lucide-react';
 import Card from '../components/Card';
 import axios from 'axios';
+import { API_URL } from '../api';
 
 const AIInsights = () => {
   const [insights, setInsights] = useState(null);
@@ -39,7 +40,7 @@ const AIInsights = () => {
 
   const fetchRepositories = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/github/repos', {
+      const response = await axios.get(`${API_URL}/api/github/repos`, {
         withCredentials: true
       });
       if (response.data) {
@@ -54,7 +55,7 @@ const AIInsights = () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await axios.get('http://localhost:5000/api/ai/insights', {
+      const response = await axios.get(`${API_URL}/api/ai/insights`, {
         withCredentials: true
       });
 
@@ -80,7 +81,7 @@ const AIInsights = () => {
     setChatLoading(true);
 
     try {
-      const response = await axios.post('http://localhost:5000/api/ai/chat', 
+      const response = await axios.post(`${API_URL}/api/ai/chat`, 
         { message: userMessage },
         { withCredentials: true }
       );

@@ -1,6 +1,7 @@
 import { Github, ArrowRight, Shield, CheckCircle2 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import AuthLayout from '../components/AuthLayout';
+import { API_URL } from '../api';
 import Button from '../components/Button';
 import Card from '../components/Card';
 
@@ -36,7 +37,7 @@ const ConnectAccount = () => {
                     </li>
                 </ul>
 
-                <a href="http://localhost:5000/api/auth/github" className="block w-full">
+                <a href={`${API_URL}/api/auth/github`} className="block w-full">
                     <Button variant="primary" className="w-full justify-center group text-lg py-4" icon={Github}>
                         Connect GitHub Account
                         <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
+import { API_URL } from '../api';
 import Card from '../components/Card';
 import Button from '../components/Button';
 import { useGithubConnection } from '../hooks/useGithubConnection';
@@ -33,7 +34,7 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/github/dashboard', {
+        const response = await axios.get(`${API_URL}/api/github/dashboard`, {
           withCredentials: true
         });
         setData(response.data);
@@ -63,7 +64,7 @@ const Dashboard = () => {
           <AlertCircle className="w-12 h-12 text-red-400 mx-auto mb-4" />
           <h3 className="text-xl font-semibold text-white mb-2">Failed to Load Data</h3>
           <p className="text-gray-400 mb-4">{error}</p>
-          <a href="http://localhost:5000/api/auth/github">
+          <a href={`${API_URL}/api/auth/github`}>
             <Button variant="primary" icon={Github}>Connect GitHub</Button>
           </a>
         </Card>
@@ -84,7 +85,7 @@ const Dashboard = () => {
                 <p className="text-sm text-gray-400">Unlock full analytics and insights</p>
               </div>
             </div>
-            <a href="http://localhost:5000/api/auth/github">
+            <a href={`${API_URL}/api/auth/github`}>
               <Button variant="primary" className="h-9 px-4 text-sm">
                 Connect Now
               </Button>
@@ -103,7 +104,7 @@ const Dashboard = () => {
                 <p className="text-sm text-gray-400">Reconnect to continue syncing your data</p>
               </div>
             </div>
-            <a href="http://localhost:5000/api/auth/github">
+            <a href={`${API_URL}/api/auth/github`}>
               <Button variant="primary" className="h-9 px-4 text-sm">
                 Reconnect
               </Button>
