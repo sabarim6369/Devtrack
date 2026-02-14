@@ -39,6 +39,30 @@ exports.githubCallback = async (req, res) => {
 
         const githubUser = userResponse.data;
 
+        // 2.1. If email is null (private), fetch from emails endpoint
+        if (!githubUser.email) {
+            try {
+                const emailsResponse = await axios.get('https://api.github.com/user/emails', {
+                    headers: { Authorization: `Bearer ${accessToken}` }
+                });
+                const emails = emailsResponse.data;
+                // Find primary email or first verified email
+                const primaryEmail = emails.find(e => e.primary && e.verified) || emails.find(e => e.verified) || emails[0];
+                if (primaryEmail) {
+                    githubUser.email = primaryEmail.email;
+                }
+            } catch (emailError) {
+                console.error('Failed to fetch GitHub emails:', emailError);
+                // Continue without email - will be handled below
+            }
+        }
+
+        // 2.2. If still no email, generate a fallback email
+        if (!githubUser.email) {
+            githubUser.email = `${githubUser.login}@github.user`;
+            console.warn(`No email found for GitHub user ${githubUser.login}, using fallback: ${githubUser.email}`);
+        }
+
         // Check if user is already logged in (Link Account)
         const existingToken = req.cookies.token;
         let user;
@@ -106,6 +130,7 @@ exports.githubCallback = async (req, res) => {
         res.cookie('token', token, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
+            sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
             maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
         });
 
@@ -150,6 +175,7 @@ exports.signup = async (req, res) => {
         res.cookie('token', token, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
+            sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
             maxAge: 7 * 24 * 60 * 60 * 1000
         });
 
@@ -190,6 +216,7 @@ exports.login = async (req, res) => {
         res.cookie('token', token, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
+            sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
             maxAge: 7 * 24 * 60 * 60 * 1000
         });
 
@@ -253,6 +280,7 @@ exports.devLogin = async (req, res) => {
         res.cookie('token', token, {
             httpOnly: true,
             secure: false, // Dev is http
+            sameSite: 'lax',
             maxAge: 24 * 60 * 60 * 1000
         });
 
